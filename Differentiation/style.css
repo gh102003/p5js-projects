@@ -1,0 +1,68 @@
+body {
+    padding: 0;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#page {
+    display: grid;
+    grid-template-columns: 1200px;
+    grid-template-rows: 800px;
+    grid-auto-flow: column;
+    align-items: start;
+    justify-items: stretch;
+    grid-gap: 10px;
+    gap: 20px;
+    margin: 10px;
+}
+
+@media only screen and (max-width: 1800px) {
+    #page {
+        grid-auto-flow: row;
+    }
+}
+
+#page > div {
+    outline: 3px solid #888;
+    -moz-outline-radius: 5px;
+}
+
+#options, #draw-options {
+    font-size: 20px;
+    padding: 5px;
+}
+
+select {
+    font-size: 20px;
+}
+
+#options > div > * {
+    vertical-align: middle;
+}
+
+#draw-options label {
+    margin-right: 8px;
+}
+
+h1 {
+    display: none;
+}
+
+footer {
+    font-size: 24px;
+    text-align: center;
+    padding: 10px;
+    background-color: #bbb;
+}
+
+footer a {
+    color: #248;
+}
+
+footer a:visited {
+    color: #4c3370;
+}
+
+footer a:hover {
+    color: #25a;
+}

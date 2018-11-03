@@ -2,72 +2,83 @@ class GraphLine {
     constructor(f) {
         this.f = f;
 
-        this.x = 0;
-        this.dx = 0;
         this.dy = 0;
-        this.resolution = 0.005;
-        this.derivativePoints = [];
+        this.drawResolution = 0.01;
+        this.order = 1;
+
+        this.derivative = new Derivative(this);
     }
 
     draw() {
         strokeWeight(2);
         noFill();
-        stroke(0, 100, 200);
+        stroke(lineColours[this.order - 1]);
         beginShape();
-        for (let x = -width / 2; x < width / 2; x += (graphScale * this.resolution)) {
+        for (let x = -width / 2; x < width / 2; x += (graphScale * this.drawResolution)) {
             vertex(x, this.f(x / graphScale) * graphScale);
         }
         endShape();
 
+        let intermediateColour = lerpColor(lineColours[this.order - 1], lineColours[this.order], 0.6);
+
         // Triangle
-        stroke(200, 0, 0);
-        this.dx = dxSlider.value();
-        this.x = (mouseX - width / 2) / graphScale;
-        let x1 = (this.x - this.dx / 2);
-        let y1 = this.f(x1);
-        let x2 = (this.x + this.dx / 2)
-        let y2 = this.f(x2);
-        line(x2 * graphScale, y1 * graphScale, x2 * graphScale, y2 * graphScale);
-        line(x1 * graphScale, y1 * graphScale, x2 * graphScale, y1 * graphScale);
-        line(x1 * graphScale, y1 * graphScale, x2 * graphScale, y2 * graphScale);
-        this.dy = y2 - y1;
+        stroke(intermediateColour);
+        this.dy = this.calculateDy(graphMouseX);
+
+        line(this.x2 * graphScale, this.y1 * graphScale, this.x2 * graphScale, this.y2 * graphScale);
+        line(this.x1 * graphScale, this.y1 * graphScale, this.x2 * graphScale, this.y1 * graphScale);
+        line(this.x1 * graphScale, this.y1 * graphScale, this.x2 * graphScale, this.y2 * graphScale);
 
         // Labels
         push(); {
-            noStroke();
-            fill(200, 0, 0);
+            stroke(255);
+            fill(intermediateColour);
             let fontSize = 18;
             textSize(fontSize);
 
+            // dx label
             push(); {
-                let offset = -fontSize;
-                if (y2 < y1) {
-                    offset = fontSize / 2;
-                }
-                translate(x1 * graphScale + 5, y1 * graphScale + offset);
+                translate(this.x1 * graphScale + 3, this.y1 * graphScale - fontSize);
                 scale(1, -1);
-                text(nf(this.dx), 0, 0);
+                text(nf(dx), 0, 0);
             }
             pop();
+            // dy label
             push(); {
-                translate(x2 * graphScale + fontSize, min(y1, y2) * graphScale + 5);
+                translate(this.x2 * graphScale + fontSize, min(this.y1, this.y2) * graphScale + 3);
                 scale(1, -1);
                 rotate(-HALF_PI);
                 text(nf(this.dy, 0, 3), 0, 0);
             }
             pop();
+            // dy/dx overlay
+            fontSize = 24;
+            textSize(fontSize);
+            push(); {
+                translate(width / 2 - 180, this.calculateOverlayY(fontSize));
+                scale(1, -1);
+                text("dy/dx = " + nf(this.dy / dx, 0, 2), 0, 0);
+            }
+            pop();
         }
         pop();
 
+        this.derivative.draw();
+    }
 
-        // Derivative points
-        stroke(0, 180, 0);
-        noFill();
-        beginShape();
-        for (let i = 0; i < this.derivativePoints.length; i++) {
-            vertex(this.derivativePoints[i].x * graphScale, this.derivativePoints[i].y * graphScale);
-        }
-        endShape();
+    calculateOverlayY(fontSize) {
+        let spacing = 3;
+        let lineHeight = fontSize + spacing;
+        let canvasBottom = - height / 2;
+        return canvasBottom + (maxOrder - this.order + 0.5) * lineHeight + spacing;
+    }
+
+    calculateDy(x) {
+        this.x1 = (x - dx / 2);
+        this.y1 = this.f(this.x1);
+        this.x2 = (x + dx / 2);
+        this.y2 = this.f(this.x2);
+        return this.y2 - this.y1;
     }
 
     toString() {
@@ -75,9 +86,6 @@ class GraphLine {
     }
 
     saveDerivativePoint() {
-        this.derivativePoints.push(createVector(this.x, this.dy / this.dx));
-
-        // Sort the points so the line is drawn correctly
-        this.derivativePoints.sort((a, b) => a.x - b.x);
+        this.derivative.savePoint(createVector(graphMouseX, this.dy / dx));
     }
 }

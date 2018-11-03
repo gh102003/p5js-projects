@@ -5,29 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Differentiation</title>
-    <style>
-        body {
-            padding: 0;
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        div {
-            margin: 10px;
-        }
-
-        input {
-            margin: 0 0 -5px 0;
-        }
-
-        p, select {
-            margin: 0 0 8px 0;
-        }
-
-        h1 {
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 
     <!--[if IE]>
     <style>h1 {display: block;}</style>
@@ -35,6 +13,7 @@
 
     <script src="../lib/p5.min.js"></script>
     <script src="../lib/addons/p5.dom.min.js"></script>
+    <script src="derivative.js"></script>
     <script src="graphLine.js"></script>
     <script src="sketch.js"></script>
 
@@ -55,7 +34,25 @@
 </head>
 
 <body>
-    <h1>Not Compatible with Internet Explorer. Please use Chrome 62 or Firefox 52 or higher</h1>
+    <h1>Not Compatible with Internet Explorer. Please use Chrome 45 or Firefox 52 or higher</h1>
+    <div id="page">
+        <div id="canvas-wrapper"></div>
+        <div id="options">
+            <div>
+                <label for="function-select">f(x) = </label>
+                <select id="function-select"></select>
+            </div>
+            <div>
+                <input id="dx-slider" type="range" min="0.05" max="1" step="0.05" value="0.5" />
+                <span id="dx-label">dx = 0.5</span>
+            </div>
+        </div>
+        <div id="draw-options">
+            <span>Derivative to calculate (move mouse and click):</span>
+        </div>
+    </div>
+
+    <footer>Made by George Howarth &middot; <a href="https://github.com/gh102003/p5js-projects/blob/master/Differentiation">View source</a></footer>
 </body>
 
 </html>

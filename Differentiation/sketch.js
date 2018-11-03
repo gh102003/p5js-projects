@@ -1,53 +1,58 @@
 var graphScale = 100;
-var graphLine;
 
-var functionSelect, dxSlider, dxLabel, dyLabel;
+// The x position of the mouse relative to the graph;
+var graphMouseX = 0;
+var dx = 0;
+
+var maxOrder = 4;
 
 var functions = {
-    "x^2": new GraphLine(x => pow(x, 2)),
-    "x^3": new GraphLine(x => pow(x, 3)),
-    "x^4": new GraphLine(x => pow(x, 4)),
-    "x^5": new GraphLine(x => pow(x, 5)),
+    "x²": new GraphLine(x => pow(x, 2)),
+    "x³": new GraphLine(x => pow(x, 3)),
+    "x⁴": new GraphLine(x => pow(x, 4)),
+    "x⁵": new GraphLine(x => pow(x, 5)),
+    "sin(x)": new GraphLine(x => sin(x)),
+    "cos(x)": new GraphLine(x => cos(x)),
+    "1/x (incorrect around x = 0)": new GraphLine(x => 1 / x),
+    "√x": new GraphLine(x => sqrt(x)),
     "0.5x + 2": new GraphLine(x => x * 0.5 + 2),
-    "x^2 + 2x - 2": new GraphLine(x => pow(x, 2) + 2 * x - 2),
-    "2(x^3) - 3(x^2) + 4x - 6": new GraphLine(x => 2 * pow(x, 3) - 3 * pow(x, 2) + 4 * x - 6)
+    "x² + 2x - 2": new GraphLine(x => pow(x, 2) + 2 * x - 2),
+    "2x³ - 3x² + 4x - 2": new GraphLine(x => 2 * pow(x, 3) - 3 * pow(x, 2) + 4 * x - 2),
+    "-2x⁴ + 2x³ - x² + 3x + 1": new GraphLine(x => -2 * pow(x, 4) + 2 * pow(x, 3) - pow(x, 2) + 3 * x + 1)
 };
 
 function setup() {
-    createCanvas(1200, 800); // Must be (even * graphScale)
+    let canvas = createCanvas(1200, 800); // dimensions must be (even * graphScale)
+    canvas.parent(select("#canvas-wrapper"));
+    canvas.attribute("oncontextmenu", "return false;");
 
-    optionsDiv = createDiv();
+    lineColours = [color(0, 200, 0), color(0, 100, 200), color(200, 0, 100), color(200, 90, 0), color(180, 150, 0)];
 
-    functionSelect = createSelect();
-    functionSelect.changed(function () {
-        graphLine = functions[functionSelect.value()];
-        updateLabels();
-    });
-    functionSelect.parent(optionsDiv);
+    functionSelect = select("#function-select");
+    functionSelect.changed(() => graphLine = functions[functionSelect.value()]);
 
     let keys = Object.keys(functions);
     for (let i = 0; i < keys.length; i++) {
         functionSelect.option(keys[i]);
     }
 
-    dxSlider = createSlider(0.05, 1, 1, 0.05);
-    dxSlider.style("display:block");
-    dxSlider.changed(() => {
-        dxLabel.html("dx = " + dxSlider.value());
-        updateLabels();
+    dxSlider = select("#dx-slider");
+    dxSlider.input(() => {
+        dx = dxSlider.value();
+        dxLabel.html("dx = " + dx);
     });
-    dxSlider.parent(optionsDiv);
+    dx = dxSlider.value();
 
-    dxLabel = createP("dx = " + dxSlider.value());
-    dxLabel.parent(optionsDiv);
-
-    dyLabel = createP("dy = ");
-    dyLabel.parent(optionsDiv);
-
-    ratioLabel = createP("dy/dx = ");
-    ratioLabel.parent(optionsDiv);
+    dxLabel = select("#dx-label");
 
     graphLine = functions[keys[0]];
+
+    derivativeSelect = createRadio();
+    derivativeSelect.parent(select("#draw-options"));
+    for (let i = 1; i < maxOrder; i++) {
+        derivativeSelect.option(i);
+    }
+    derivativeSelect.selected(derivativeSelect._getInputChildrenArray()[0].value);
 }
 
 function draw() {
@@ -57,6 +62,8 @@ function draw() {
 
     translate(width / 2, height / 2);
     scale(1, -1);
+
+    graphMouseX = (mouseX - width / 2) / graphScale;
 
     let axisTickSize = 10;
 
@@ -75,18 +82,26 @@ function draw() {
     graphLine.draw();
 }
 
-function mouseMoved() {
-    updateLabels();
-    return false;
-}
-
-function updateLabels() {
-    dyLabel.html("dy = " + nf(graphLine.dy, 0, 3));
-    ratioLabel.html("dy/dx = " + nf(graphLine.dy / dxSlider.value(), 0, 3));
-}
-
 function mousePressed() {
     if (mouseX <= width && mouseX >= 0 && mouseY <= height && mouseY >= 0) {
-        graphLine.saveDerivativePoint();
+        let derivativeToDraw = parseInt(derivativeSelect.value());
+        
+        let derivative = graphLine;
+        while (derivative.order < derivativeToDraw) {
+            derivative = derivative.derivative;
+        }
+        derivative.saveDerivativePoint();
+        return false;
+    }
+}
+
+function keyTyped() {
+    // Set derivative to calculate
+    let values = derivativeSelect._getInputChildrenArray();
+    for (let i = 0; i < values.length; i++) {
+        if (key === values[i].value) {
+            derivativeSelect.value(key);
+            return;
+        }
     }
 }
