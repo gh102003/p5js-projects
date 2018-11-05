@@ -13,7 +13,7 @@ var functions = {
     "x⁵": new GraphLine(x => pow(x, 5)),
     "sin(x)": new GraphLine(x => sin(x)),
     "cos(x)": new GraphLine(x => cos(x)),
-    "1/x (incorrect around x = 0)": new GraphLine(x => 1 / x),
+    "1/x (incorrect near x = 0)": new GraphLine(x => 1 / x),
     "√x": new GraphLine(x => sqrt(x)),
     "0.5x + 2": new GraphLine(x => x * 0.5 + 2),
     "x² + 2x - 2": new GraphLine(x => pow(x, 2) + 2 * x - 2),
