@@ -2,7 +2,8 @@ export var lightSize = 50;
 
 export class Light {
     constructor() {
-        this.frameToggled = frameCount;
+        this.frameToggled = frameCount - 500; // Set early to prevent animation on level change
+        this.noiseSeed = random(0, 10);
     }
 
     initialise(x, y, color, isOn) {
@@ -12,8 +13,8 @@ export class Light {
         this.isOn = isOn;
     }
 
-    draw() {
-        noStroke();
+    draw(lightsGraphics) {
+        lightsGraphics.noStroke();
         // Shining effect
         let timeSinceToggle = frameCount - this.frameToggled;
         let shineColor = color(red(this.color), green(this.color), blue(this.color), 1);
@@ -21,23 +22,31 @@ export class Light {
         let shineSize;
         
         if(this.isOn) {
-            shineSize = min(maxShineSize, lightSize + timeSinceToggle * 10);
+            shineSize = min(maxShineSize, lightSize + timeSinceToggle * 20);
             
-            fill(this.color);
+            // Colour transition
+            let baseColor = lerpColor(this.color, color(0), max(0, 0.6 - timeSinceToggle / 20));
+            // Flicker using perlin noise
+            noiseSeed(this.noiseSeed);
+            noiseDetail(2, 0.3);
+            let currentNoise = noise(frameCount / 30) - 0.05;
+            shineSize += currentNoise * 15 - 5;
+            let flickerColor = lerpColor(baseColor, color(255), min(currentNoise * 0.6, 0.5));
+            lightsGraphics.fill(flickerColor);
         } else {
-            shineSize = maxShineSize - timeSinceToggle * 10;
+            shineSize = maxShineSize - timeSinceToggle * 8;
             
-            fill(lerpColor(this.color, color(0), 0.6));
+            lightsGraphics.fill(lerpColor(this.color, color(0), min(0.6, timeSinceToggle / 20)));
         }
-        ellipse(this.x, this.y, lightSize, lightSize);
-        stroke(255, 150);
-        arc(this.x, this.y, lightSize - 20, lightSize - 20, PI * 1.1, PI * 1.3);
+        lightsGraphics.ellipse(this.x, this.y, lightSize, lightSize);
+        lightsGraphics.stroke(255, 150);
+        lightsGraphics.arc(this.x, this.y, lightSize - 20, lightSize - 20, PI * 1.1, PI * 1.3);
         
         // Shining
-        noStroke();
-        fill(shineColor);
+        lightsGraphics.noStroke();
+        lightsGraphics.fill(shineColor);
         for (let i = shineSize; i > lightSize; i *= 0.99) {
-            ellipse(this.x, this.y, i);
+            lightsGraphics.ellipse(this.x, this.y, i);
         }
     }
 
@@ -54,7 +63,7 @@ export class Light {
 // None
 export class WhiteLight extends Light {
     initialise(x, y, isOn) {
-        super.initialise(x, y, color(220), isOn);
+        super.initialise(x, y, color(220, 210, 180), isOn);
     }
 
     click(lights, index) {
@@ -83,10 +92,22 @@ export class GreenLight extends Light {
     }
 }
 
+// Only neighbours
+export class BlueLight extends Light {
+    initialise(x, y, isOn) {
+        super.initialise(x, y, color(0, 0, 200), isOn);
+    }
+
+    click(lights, index) {
+        if (lights[index - 1] !== undefined) lights[index - 1].toggle();
+        if (lights[index + 1] !== undefined) lights[index + 1].toggle();
+    }
+}
+
 // Itself and two neighbours
 export class YellowLight extends Light {
     initialise(x, y, isOn) {
-        super.initialise(x, y, color(200, 200, 0), isOn);
+        super.initialise(x, y, color(210, 210, 0), isOn);
     }
 
     click(lights, index) {
@@ -96,3 +117,24 @@ export class YellowLight extends Light {
         } 
     }
 }
+
+// All to left/right
+export class PinkLight extends Light {
+    initialise(x, y, isOn, {direction}) {
+        super.initialise(x, y, color(210, 210, 0), isOn);
+        this.direction = direction;
+    }
+
+    click(lights, index) {
+        if (this.direction === "left") {
+            for (let i = 0; i <= index; i++) {
+                lights[i].toggle();
+            } 
+        } else if (this.direction === "right") {
+            for (let i = lights.length; i >= index; i--) {
+                lights[i].toggle();
+            }
+        }
+    }
+}
+
