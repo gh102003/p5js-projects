@@ -1,15 +1,16 @@
 import {lightSize} from "./light.mjs";
 import {LightFactory} from "./lightFactory.mjs";
-import {levels} from "./levels.js";
+import {levels} from "./levels.mjs";
 
 function loadLevel(levelNum, factory) {
     let level = levels[levelNum];
     lights = [];
     levelText = `Level ${levelNum + 1}: ${level.name}`;
+    levelHint = level.hint === undefined ? null : `Hint: ${level.hint}`;
     for (let i = 0; i < level.lights.length; i++) {
         
         let light = factory.create(level.lights[i].type);
-        light.initialise(100 + i * 100, 100, level.lights[i].state, level.lights[i].parameters);
+        light.initialise(lightSize * 1.5 + i * lightSize * 2, lightSize * 1.5, level.lights[i].state, level.lights[i].parameters);
         lights.push(light);
     }
 }
@@ -24,21 +25,26 @@ function checkWin() {
 }
 
 var timeSinceWin = 0;
+var showHint = false;
 
 var levelNum = 0;
 var levelText = "";
+var levelHint = null;
+
 var lightsGraphics;
 var lights = [];
 
 var setup = function() {
     createCanvas(1600, 600);
-    lightsGraphics = createGraphics(1600, 200, P2D);
+    lightsGraphics = createGraphics(1600, 3 * lightSize, P2D);
 
     loadLevel(levelNum, new LightFactory());
+
+    setShakeThreshold(15);
 };
 
 var draw = function() {
-    // frameRate(5);
+    // frameRate(10);
     background(40);
     lightsGraphics.background(40);
     
@@ -67,8 +73,19 @@ var draw = function() {
     // Text
     fill(230);
     let fontSize = 36;
-    textSize(fontSize);
+    drawingContext.font = `600 ${fontSize}px Poppins, sans-serif`; // Manually set font, size and weight
     text(levelText, fontSize, height - fontSize);
+
+    if (levelHint !== null) {
+        fill(140);
+        textSize(20);
+        textFont("Poppins");
+        if (showHint) {
+            text(levelHint, fontSize, height - fontSize * 2.1);
+        } else {
+            text("Press 'h' or shake your device to reveal a hint", fontSize, height - fontSize * 2.1);
+        }
+    }
 };
 
 var mouseReleased = function() {
@@ -90,12 +107,31 @@ var mouseReleased = function() {
             } else {
                 lights = [];
                 levelText = "Well done, you win!";
+                levelHint = null;
             }
             timeSinceWin = 0;
+            showHint = false;
         }, 400);
+    }
+};
+
+var keyTyped = function() {
+    // 'h' for hint
+    if (key === "h") {
+        showHint = !showHint;
+    }
+};
+
+var lastShake = 0;
+var deviceShaken = function() {
+    if (frameCount - lastShake > 100) {
+        showHint = !showHint;        
+        lastShake = frameCount;
     }
 };
 
 window.setup = setup; 
 window.draw = draw;
 window.mouseReleased = mouseReleased;
+window.keyTyped = keyTyped;
+window.deviceShaken = deviceShaken;
