@@ -1,6 +1,7 @@
 class GraphLine {
-    constructor(f) {
+    constructor(f, params) {
         this.f = f;
+        this.params = params;
 
         this.dy = 0;
         this.drawResolution = 0.01;
@@ -15,7 +16,7 @@ class GraphLine {
         stroke(lineColours[this.order - 1]);
         beginShape();
         for (let x = -width / 2; x < width / 2; x += (graphScale * this.drawResolution)) {
-            vertex(x, this.f(x / graphScale) * graphScale);
+            vertex(x, this.f(x / graphScale, this.params) * graphScale);
         }
         endShape();
 
@@ -75,9 +76,9 @@ class GraphLine {
 
     calculateDy(x) {
         this.x1 = (x - dx / 2);
-        this.y1 = this.f(this.x1);
+        this.y1 = this.f(this.x1, this.params);
         this.x2 = (x + dx / 2);
-        this.y2 = this.f(this.x2);
+        this.y2 = this.f(this.x2, this.params);
         return this.y2 - this.y1;
     }
 
@@ -87,5 +88,17 @@ class GraphLine {
 
     saveDerivativePoint() {
         this.derivative.savePoint(createVector(graphMouseX, this.dy / dx));
+    }
+
+    showExtraDivs() {
+        if (this.div) {
+            this.div.show();
+        }
+    }
+
+    hideExtraDivs() {
+        if (this.div) {
+            this.div.hide();
+        }
     }
 }

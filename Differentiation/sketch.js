@@ -6,22 +6,28 @@ var dx = 0;
 
 var maxOrder = 4;
 
-var functions = {
-    "x²": new GraphLine(x => pow(x, 2)),
-    "x³": new GraphLine(x => pow(x, 3)),
-    "x⁴": new GraphLine(x => pow(x, 4)),
-    "x⁵": new GraphLine(x => pow(x, 5)),
-    "sin(x)": new GraphLine(x => sin(x)),
-    "cos(x)": new GraphLine(x => cos(x)),
-    "1/x (incorrect near x = 0)": new GraphLine(x => 1 / x),
-    "√x": new GraphLine(x => sqrt(x)),
-    "0.5x + 2": new GraphLine(x => x * 0.5 + 2),
-    "x² + 2x - 2": new GraphLine(x => pow(x, 2) + 2 * x - 2),
-    "2x³ - 3x² + 4x - 2": new GraphLine(x => 2 * pow(x, 3) - 3 * pow(x, 2) + 4 * x - 2),
-    "-2x⁴ + 2x³ - x² + 3x + 1": new GraphLine(x => -2 * pow(x, 4) + 2 * pow(x, 3) - pow(x, 2) + 3 * x + 1)
-};
+var functions;
 
 function setup() {
+    functions = {
+        "x²": new GraphLine(x => pow(x, 2)),
+        "x³": new GraphLine(x => pow(x, 3)),
+        "x⁴": new GraphLine(x => pow(x, 4)),
+        "x⁵": new GraphLine(x => pow(x, 5)),
+        "sin(x)": new GraphLine(x => sin(x)),
+        "cos(x)": new GraphLine(x => cos(x)),
+        "1/x (incorrect near x = 0)": new GraphLine(x => 1 / x),
+        "2^x": new GraphLine(x => pow(2, x)),
+        "e^x": new GraphLine(x => Math.exp(x)),
+        "3^x": new GraphLine(x => pow(3, x)),
+        "a^x (find e)": new GraphLineFindE(),
+        "√x": new GraphLine(x => sqrt(x)),
+        "0.5x + 2": new GraphLine(x => x * 0.5 + 2),
+        "x² + 2x - 2": new GraphLine(x => pow(x, 2) + 2 * x - 2),
+        "2x³ - 3x² + 4x - 2": new GraphLine(x => 2 * pow(x, 3) - 3 * pow(x, 2) + 4 * x - 2),
+        "-2x⁴ + 2x³ - x² + 3x + 1": new GraphLine(x => -2 * pow(x, 4) + 2 * pow(x, 3) - pow(x, 2) + 3 * x + 1)
+    };
+
     let canvas = createCanvas(1200, 800); // dimensions must be (even * graphScale)
     canvas.parent(select("#canvas-wrapper"));
     canvas.attribute("oncontextmenu", "return false;");
@@ -29,7 +35,13 @@ function setup() {
     lineColours = [color(0, 200, 0), color(0, 100, 200), color(200, 0, 100), color(200, 90, 0), color(180, 150, 0)];
 
     functionSelect = select("#function-select");
-    functionSelect.changed(() => graphLine = functions[functionSelect.value()]);
+    functionSelect.changed(() => {
+        graphLine = functions[functionSelect.value()]
+        for (let i = 0; i < Object.values(functions).length; i++) {
+            Object.values(functions)[i].hideExtraDivs();
+        }
+        graphLine.showExtraDivs();
+    });
 
     let keys = Object.keys(functions);
     for (let i = 0; i < keys.length; i++) {
@@ -85,7 +97,7 @@ function draw() {
 function mousePressed() {
     if (mouseX <= width && mouseX >= 0 && mouseY <= height && mouseY >= 0) {
         let derivativeToDraw = parseInt(derivativeSelect.value());
-        
+
         let derivative = graphLine;
         while (derivative.order < derivativeToDraw) {
             derivative = derivative.derivative;

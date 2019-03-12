@@ -27,7 +27,7 @@ body {
     -moz-outline-radius: 5px;
 }
 
-#options, #draw-options {
+#options, #draw-options, .line-options {
     font-size: 20px;
     padding: 5px;
 }
