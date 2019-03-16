@@ -6,12 +6,14 @@ class GraphLineFindE extends GraphLine {
         this.params = {a: 2};
 
         this.div = createDiv();
-        this.div.addClass("line-options");
+        this.div.addClass("line-options options");
         this.div.parent(select("#page"));
         this.div.hide();
 
-        this.label = createSpan("a = 2");
-
+        let instructions = createP("<i>e</i> is the value where all derivatives of e^x are equal");
+        instructions.parent(this.div);
+        
+        
         this.slider = createSlider(0.1, 5, 2, 0.1);
         this.slider.parent(this.div);
         this.slider.input(() => {
@@ -19,7 +21,8 @@ class GraphLineFindE extends GraphLine {
             this.params.a = value;
             this.label.html("a = " + value);
         });
-
+        
+        this.label = createSpan("a = 2");
         this.label.parent(this.div);
     }
 
