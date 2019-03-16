@@ -58,7 +58,7 @@ class GraphLine {
             push(); {
                 translate(width / 2 - 180, this.calculateOverlayY(fontSize));
                 scale(1, -1);
-                text("Δy/Δx = " + nf(this.dy / dx, 0, 2), 0, 0);
+                text("dy/dx = " + nf(this.dy / dx, 0, 2), 0, 0);
             }
             pop();
         }

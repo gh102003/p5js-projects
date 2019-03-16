@@ -20,8 +20,9 @@ class GraphLineFindE extends GraphLine {
             let value = this.slider.value();
             this.params.a = value;
             this.label.html("a = " + value);
+            this.derivative = new Derivative(this);
         });
-        
+
         this.label = createSpan("a = 2");
         this.label.parent(this.div);
     }

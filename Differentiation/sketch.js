@@ -52,6 +52,7 @@ function setup() {
     dxSlider.input(() => {
         dx = dxSlider.value();
         dxLabel.html("dx = " + dx);
+        graphLine.derivative = new Derivative(graphLine);
     });
     dx = dxSlider.value();
 
