@@ -36,14 +36,18 @@ select {
 }
 
 #draw-options label {
-    margin: 0 10px 0 2px;
+    padding: 0 10px 0 2px;
+}
+
+label {
+    user-select: none;
 }
 
 .options p {
     margin: 0;
 }
 
-.options > div {
+#line-options > div {
     margin-bottom: 5px;
 }
 
