@@ -4,7 +4,7 @@ class GraphLine {
         this.params = params;
 
         this.dy = 0;
-        this.drawResolution = 0.01;
+        this.drawResolution = 0.05;
         this.order = 1;
 
         this.derivative = new Derivative(this);
