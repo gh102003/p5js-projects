@@ -31,6 +31,12 @@ body {
     padding: 5px;
 }
 
+.options > div {
+    display: flex;
+    align-items: center;
+    padding-top: 5px;
+}
+
 select {
     font-size: 20px;
 }
@@ -51,8 +57,8 @@ label {
     margin-bottom: 5px;
 }
 
-.line-options input[type=range]+span {
-    margin-left: 6px;
+.options input[type=range]+span, .options label+select {
+    margin-left: 8px;
 }
 
 h1 {

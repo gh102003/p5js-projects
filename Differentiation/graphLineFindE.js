@@ -10,20 +10,22 @@ class GraphLineFindE extends GraphLine {
         this.div.parent(select("#page"));
         this.div.hide();
 
-        let instructions = createP("<i>e</i> is the value where all derivatives of e^x are equal");
+        let instructions = createP(`<i>${katex.renderToString(`e`)}</i> is the value where all derivatives of ${katex.renderToString(`e^{x}`)} are equal`);
         instructions.parent(this.div);
-        
         
         this.slider = createSlider(0.1, 5, 2, 0.1);
         this.slider.parent(this.div);
         this.slider.input(() => {
             let value = this.slider.value();
             this.params.a = value;
-            this.label.html("a = " + value);
             this.derivative = new Derivative(this);
+            
+            // Update label
+            katex.render(String.raw `a = ${value}`, this.label.elt);
         });
 
-        this.label = createSpan("a = 2");
+        this.label = createSpan();
+        katex.render(String.raw `a = 2`, this.label.elt);
         this.label.parent(this.div);
     }
 

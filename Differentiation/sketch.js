@@ -51,8 +51,9 @@ function setup() {
     dxSlider = select("#dx-slider");
     dxSlider.input(() => {
         dx = dxSlider.value();
-        dxLabel.html("dx = " + dx);
         graphLine.derivative = new Derivative(graphLine);
+        // Update label
+        katex.render(String.raw `\Delta x = ${dx}`, dxLabel.elt);
     });
     dx = dxSlider.value();
 
