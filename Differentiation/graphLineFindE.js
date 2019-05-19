@@ -7,7 +7,7 @@ class GraphLineFindE extends GraphLine {
 
         this.div = createDiv();
         this.div.addClass("line-options options");
-        this.div.parent(select("#page"));
+        this.div.parent(select("#controls"));
         this.div.hide();
 
         let instructions = createP(`<i>${katex.renderToString(`e`)}</i> is the value where all derivatives of ${katex.renderToString(`e^{x}`)} are equal`);

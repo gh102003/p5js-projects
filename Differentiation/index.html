@@ -46,18 +46,21 @@
     <h1>Not Compatible with Internet Explorer. Please use Chrome 45 or Firefox 52 or higher</h1>
     <div id="page">
         <div id="canvas-wrapper"></div>
-        <div id="function-options" class="options">
-            <div>
-                <label for="function-select">\(y = \)</label>
-                <select id="function-select"></select>
+
+        <div id="controls">
+            <div id="function-options" class="options">
+                <div>
+                    <label for="function-select">\(y = \)</label>
+                    <select id="function-select"></select>
+                </div>
+                <div>
+                    <input id="dx-slider" type="range" min="0.05" max="1" step="0.05" value="0.5" />
+                    <span id="dx-label">\(\Delta x = 0.5\)</span>
+                </div>
             </div>
-            <div>
-                <input id="dx-slider" type="range" min="0.05" max="1" step="0.05" value="0.5" />
-                <span id="dx-label">\(\Delta x = 0.5\)</span>
+            <div id="draw-options" class="options">
+                <p>Derivative to calculate (move mouse and click):</p>
             </div>
-        </div>
-        <div id="draw-options" class="options">
-            <p>Derivative to calculate (move mouse and click):</p>
         </div>
     </div>
 
