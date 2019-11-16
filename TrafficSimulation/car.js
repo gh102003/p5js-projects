@@ -3,8 +3,10 @@ const CAR_LENGTH = 45;
 const BASE_FRICTION = 0.08;
 
 const STEERING_CHANGE_RATE = 0.2;
-const STEERING_RATE = 0.02;
+const STEERING_RATE = 0.025;
 const STEERING_DECELERATION_RATE = 0.03;
+const STEERING_AUTO_CENTRE_RATE = 0.05;
+
 const ACCELERATION_RATE = 0.2;
 const BRAKE_RATE = 0.4;
 
@@ -18,6 +20,10 @@ class Car {
 
         // Used to store rotation when still
         this.heading = this.vel.heading();
+
+        // Target
+        this.targetPos = null;
+        this.targetHeading = null;
 
         // Pedals - between 0 and 1
         this.acceleratorPedal = 0;
@@ -34,7 +40,41 @@ class Car {
      * @param {number} direction positive if from 1 -> 2, negative if from 2 -> 1 
      */
     followRoad(road, direction) {
+        // print("snap " + direction);
+        let deltaX, deltaY;
+        if (direction > 0) {
+            deltaX = road.pos2.x - road.pos1.x;
+            deltaY = road.pos2.y - road.pos1.y;
+        } else if (direction < 0) {
+            deltaX = road.pos1.x - road.pos2.x;
+            deltaY = road.pos1.y - road.pos2.y;
+        }
+        let roadAngle = atan2(deltaY, deltaX);
+        // this.vel.rotate(roadAngle - this.heading);
+        this.targetHeading = roadAngle;
+    }
 
+    /**
+     * Moves the car towards its target position and heading
+     * 
+     * Assumes this.heading is correct
+     */
+    moveToTarget() {
+        // Adjust heading using steering wheel
+        if (this.targetHeading) {
+            let rotationNeeded = this.targetHeading - this.heading;
+            if (rotationNeeded > PI) rotationNeeded -= TWO_PI;
+            if (rotationNeeded < -PI) rotationNeeded += TWO_PI;
+            
+            console.log(degrees(rotationNeeded));
+            
+            this.steeringWheel = max(-1, min(1, this.steeringWheel + rotationNeeded * 0.12));
+            
+            // Lose target if no rotation is needed
+            if (abs(rotationNeeded) < 0.002 ) {
+                this.targetHeading = null;
+            }
+        }
     }
 
     applyPhysics() {
@@ -45,7 +85,7 @@ class Car {
         let frictionScalar = min(BASE_FRICTION + brakeFriction + steeringFriction, this.vel.mag());
         this.acc = p5.Vector.fromAngle(this.heading, accScalar - frictionScalar);
 
-        let angleChange = this.steeringWheel * STEERING_RATE * min(3, sq(0.5 * this.vel.mag()));
+        let angleChange = this.steeringWheel * STEERING_RATE * min(4, sq(0.4 * this.vel.mag()));
         this.vel = p5.Vector.fromAngle(this.heading + angleChange, this.vel.mag());
     }
 
@@ -71,23 +111,13 @@ class Car {
             if (this.steeringWheel < -1) {
                 this.steeringWheel = -1;
             }
-        } else {
-            if (this.steeringWheel > STEERING_CHANGE_RATE) {
-                this.steeringWheel -= STEERING_CHANGE_RATE;
-            } else if (this.steeringWheel < -STEERING_CHANGE_RATE) {
-                this.steeringWheel += STEERING_CHANGE_RATE;
-            } else {
-                this.steeringWheel = 0;
-            }
         }
 
-        for (let i = roads.length - 1; i >= 0; i--) { // reverse order for priority to a higher road
-            let road = roads[i];
-            if (road.pos1.copy().sub(this.pos).mag() < road.laneCount / 2 * LANE_WIDTH) {
-                print("snap 1");
-            } else if (road.pos2.copy().sub(this.pos).mag() < road.laneCount / 2 * LANE_WIDTH) {
-                print("snap 2");
-            }
+        // Auto centre steering wheel
+        if (this.steeringWheel > STEERING_AUTO_CENTRE_RATE) {
+            this.steeringWheel -= STEERING_AUTO_CENTRE_RATE;
+        } else if (this.steeringWheel < -STEERING_AUTO_CENTRE_RATE) {
+            this.steeringWheel += STEERING_AUTO_CENTRE_RATE;
         }
 
         // Set small vectors to 0
@@ -96,10 +126,21 @@ class Car {
         }
 
         this.applyPhysics();
-
+        
         // Update velocity and position
         this.vel.add(this.acc);
         this.pos.add(this.vel);
+
+        for (let i = roads.length - 1; i >= 0; i--) { // reverse order for priority to a higher road
+            let road = roads[i];
+            if (road.pos1.copy().sub(this.pos).mag() < road.laneCount / 2 * LANE_WIDTH) {
+                this.followRoad(road, 1);
+            } else if (road.pos2.copy().sub(this.pos).mag() < road.laneCount / 2 * LANE_WIDTH) {
+                this.followRoad(road, -1);
+            }
+        }
+
+        this.moveToTarget();
 
         // Update heading, but not if car is still
         if (this.vel.mag() > 0.001) {
@@ -171,5 +212,12 @@ class Car {
         stroke(0, 220, 0, 180);
         strokeWeight(3);
         line(0, 0, this.acc.x * 500, this.acc.y * 500);
+
+        // Target heading
+        if (this.targetHeading) {
+            stroke(50, 50, 220, 180);
+            strokeWeight(3);
+            line(0, 0, 100 * cos(this.targetHeading), 100 * sin(this.targetHeading));
+        }
     }
 }
